@@ -29,13 +29,13 @@ namespace Graphics
             Console.WriteLine();
             Console.WriteLine("<-----~-----+- STARTED -+-----~----->");
             Console.WriteLine();
-            var slicedPizza = new string[args.Length];
+
             for (var i = 0; i < args.Length; i++)
             {
                 var path = args[i];
                 if (File.Exists(path))
                 {
-                    slicedPizza[i] = SliceThisPizza(path);
+                    SliceThisPizza(path);
                 }
             }
 
@@ -63,13 +63,15 @@ namespace Graphics
             Console.WriteLine($"Max. # of cells in each slice = {_pizza.CellsMaxInSlice}");
         }
 
-        private static string SliceThisPizza(string path)
+        private static void SliceThisPizza(string path)
         {
             _inputPath = path;
-            var output = string.Empty;
             _pizza = new Pizza(path);
             _inputFileName = Path.GetFileName(_inputPath);
 
+            MultiDimensionalSlicing(_pizza);
+
+            /*
             var defaultColor = Console.ForegroundColor;
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -89,8 +91,128 @@ namespace Graphics
                 $"+-~-+-~-+-~-+-~-+-~-+-~-+ FINISHED SLICING PIZZA {_inputFileName} +-~-+-~-+-~-+-~-+-~-+-~-+");
             Console.WriteLine();
             Console.ForegroundColor = defaultColor;
+            */
+        }
 
-            return output;
+        private static void MultiDimensionalSlicing(Pizza pizza)
+        {
+            var defaultColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine(
+                $"+-~-+-~-+-~-+-~-+-~-+-~-+   START SLICING PIZZA {_inputFileName} :: BI-DIMENSIONAL +-~-+-~-+-~-+-~-+-~-+-~-+");
+            Console.WriteLine();
+            Console.ForegroundColor = defaultColor;
+
+            var slicesAttemps = Slice(pizza);
+
+            for (var i = 0; i < slicesAttemps.Count; i++)
+            {
+                var sliceAttempt = slicesAttemps[i];
+
+                Console.WriteLine($"{i}.\tAttemp Dimensions::\t{sliceAttempt.DimensionsAttempt}");
+                var slicedRatio = (float)sliceAttempt.TotalSlicedCells/(float)pizza.Size * 100;
+                Console.WriteLine($"\tTotal sliced cells: {sliceAttempt.TotalSlicedCells} of {pizza.Size}, Percentage: {slicedRatio} %");
+                
+                Console.WriteLine();
+            }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine();
+            Console.WriteLine(
+                $"+-~-+-~-+-~-+-~-+-~-+-~-+ FINISHED SLICING PIZZA {_inputFileName} :: BI-DIMENSIONAL +-~-+-~-+-~-+-~-+-~-+-~-+");
+            Console.WriteLine();
+            Console.ForegroundColor = defaultColor;
+        }
+
+        private class SlicingAttempts : List<SlicingAttempts>
+        {
+            public char[,] SlicePizzaContent { private set; get; }
+            public HashSet<string> SuccessfulSlices { private set; get; }
+            public int TotalSlicedCells { private set; get; }
+            public string DimensionsAttempt { private set; get; }
+            public void PushAttempt(
+                char[,] slicePizzaContent,
+                HashSet<string> successfulSlices,
+                int totalSlicedCells,
+                int rowsCount,
+                int colsCount)
+            {
+                Add(new SlicingAttempts
+                {
+                    SlicePizzaContent = slicePizzaContent,
+                    SuccessfulSlices = successfulSlices,
+                    TotalSlicedCells = totalSlicedCells,
+                    DimensionsAttempt = $"Rows Count: {rowsCount} , Columns Count: {colsCount}"
+                });
+            }
+        }
+
+        private static SlicingAttempts Slice(Pizza pizza)
+        {
+            var slicingAttempts = new SlicingAttempts();
+            var minCellsCount = pizza.CellsMinInSlice;
+            var firstCellsInSlice =
+                ((minCellsCount % 2) == 0) ? minCellsCount : minCellsCount + 1;
+
+            for (
+                var cellsInSlice = firstCellsInSlice;
+                ((cellsInSlice <= pizza.CellsMaxInSlice) && (cellsInSlice % 2) == 0);
+                cellsInSlice++)
+            {
+                for (
+                    var rowsInSlice = 1;
+                    ((rowsInSlice <= cellsInSlice) && (cellsInSlice % rowsInSlice) == 0);
+                    rowsInSlice++)
+                {
+                    var colsInSlice = cellsInSlice / rowsInSlice;
+
+                    (var content, var slices, var cells) =
+                        MultiDimensionalSlicing_SuccessorApproach(pizza.Clone(), rowsInSlice, colsInSlice);
+
+                    slicingAttempts.PushAttempt(content, slices, cells, rowsInSlice, colsInSlice);
+                }
+            }
+
+            return slicingAttempts;
+        }
+
+        /// <summary>
+        /// This method slices the pizza in way that the origin point of each slice-attempt is next to the
+        /// origin of the previous one always.
+        /// </summary>
+        /// <returns></returns>
+        private static (char[,], HashSet<string>, int) MultiDimensionalSlicing_SuccessorApproach(
+            Pizza pizza,
+            int rowsInSlice,
+            int colsInSlice)
+        {
+            var successfulSlices = new HashSet<string>();
+            var totalCellsSliced = 0;
+
+            for (var i = 0; rowsInSlice <= (pizza.RowsPizzaCount - i); i++)
+            {
+                for (var j = 0; colsInSlice <= (pizza.ColumnsPizzaCount - j); j++)
+                {
+                    var startPoint = new Point(i, j);
+                    var endPoint = new Point(i + rowsInSlice - 1, j + colsInSlice - 1);
+
+                    var pizzaSlice = new SlicePizza(pizza, startPoint, endPoint);
+
+                    if (pizzaSlice.IsValidSlice)
+                    {
+                        pizza.CutSlice(pizzaSlice);
+                        successfulSlices.Add(
+                            pizzaSlice.StartPoint.X + " " +
+                            pizzaSlice.EndPoint.X + " " +
+                            pizzaSlice.StartPoint.Y + " " +
+                            pizzaSlice.EndPoint.Y);
+                        totalCellsSliced += pizzaSlice.Size;
+                    }
+                }
+            }
+
+            return (pizza.Content, successfulSlices, totalCellsSliced);
         }
 
         private static void StartSlicing()
@@ -139,7 +261,7 @@ namespace Graphics
                         var currentHigherIndex = location + lengthSlice - 1;
                         if (currentHigherIndex > higherColumnIndex) break;
 
-                        var slicePizza = CreateHorizontalSlice(row, location, lengthSlice, ref pizza);
+                        var slicePizza = CreateHorizontalSlice(row, location, lengthSlice, pizza);
                         if (slicePizza.IsValidSlice)
                         {
                             location = slicePizza.EndPoint.Y + 1;
@@ -177,7 +299,7 @@ namespace Graphics
             return successfulSlices;
         }
 
-        private static SlicePizza CreateHorizontalSlice(int row, int startLocation, int length, ref Pizza pizza)
+        private static SlicePizza CreateHorizontalSlice(int row, int startLocation, int length, Pizza pizza)
         {
             var endLocation = startLocation + length - 1;
             var startPoint = new Point(row, startLocation);
@@ -286,7 +408,7 @@ namespace Graphics
         {
             Console.WriteLine($"Generating output file of operation: {operationName}");
             var outputFileName = PathToSave(operationName, ".out");
-            
+
             File.WriteAllText(outputFileName, successfulSlices.Count + Environment.NewLine);
             File.AppendAllLines(outputFileName, successfulSlices);
 
@@ -427,6 +549,7 @@ namespace Graphics
             public int IngredintsMinInSlice { private set; get; }
             public int CellsMaxInSlice { private set; get; }
             public int CellsMinInSlice { private set; get; }
+            public int Size { private set; get; }
 
             public char[,] Content { private set; get; }
 
@@ -446,6 +569,7 @@ namespace Graphics
                 IngredintsMinInSlice = int.Parse(headerTokens[2]);
                 CellsMaxInSlice = int.Parse(headerTokens[3]);
                 CellsMinInSlice = IngredintsMinInSlice * 2;
+                Size = ColumnsPizzaCount * RowsPizzaCount;
 
                 Content = new char[RowsPizzaCount, ColumnsPizzaCount];
 
@@ -481,7 +605,8 @@ namespace Graphics
                     IngredintsMinInSlice = IngredintsMinInSlice,
                     CellsMaxInSlice = CellsMaxInSlice,
                     CellsMinInSlice = CellsMinInSlice,
-                    Content = (char[,]) Content.Clone()
+                    Content = (char[,]) Content.Clone(),
+                    Size = Size
                 };
             }
         }
