@@ -68,6 +68,9 @@
     <None Include="big.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="example.in">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="medium.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

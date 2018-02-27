@@ -232,7 +232,7 @@ namespace Graphics
             attempsPossible.Push(4,2);*/
 
             //small.in
-            /*attempsPossible.Push(5, 1);
+            attempsPossible.Push(5, 1);
             attempsPossible.Push(1, 5);
             attempsPossible.Push(4, 1);
             attempsPossible.Push(2, 2);
@@ -240,7 +240,7 @@ namespace Graphics
             attempsPossible.Push(1, 3);
             attempsPossible.Push(1, 4);
             attempsPossible.Push(2, 1);
-            attempsPossible.Push(1, 2);*/
+            attempsPossible.Push(1, 2);
 
             return attempsPossible;
         }
@@ -293,8 +293,8 @@ namespace Graphics
                         pizza.CutSlice(pizzaSlice);
                         successfulSlices.Add(
                             pizzaSlice.StartPoint.X + " " +
-                            pizzaSlice.EndPoint.X + " " +
                             pizzaSlice.StartPoint.Y + " " +
+                            pizzaSlice.EndPoint.X + " " +
                             pizzaSlice.EndPoint.Y);
                         totalCellsSliced += pizzaSlice.Size;
                     }
