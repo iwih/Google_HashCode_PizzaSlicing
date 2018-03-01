@@ -55,6 +55,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
@@ -65,19 +66,33 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="big.in">
+    <None Include="input\big.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="example.in">
+    <None Include="input\example.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="medium.in">
+    <None Include="input\medium.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="output\big.in__sliced-pizzaCell-ultimate-slicing-887601.out" />
+    <None Include="output\big.in__ultimate-slicing-887601.out" />
+    <None Include="output\example.in__sliced-pizzaCell-ultimate-slicing-15.out" />
+    <None Include="output\example.in__ultimate-slicing-15.out" />
+    <None Include="output\medium.in__sliced-pizzaCell-ultimate-slicing-47945.out" />
+    <None Include="output\medium.in__ultimate-slicing-47945.out" />
+    <None Include="output\small.in__sliced-pizzaCell-ultimate-slicing-42.out" />
+    <None Include="output\small.in__ultimate-slicing-42.out" />
     <None Include="packages.config" />
-    <None Include="small.in">
+    <None Include="input\small.in">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="output\big.in__ultimate-slicing-887601.bmp" />
+    <Content Include="output\example.in__ultimate-slicing-15.bmp" />
+    <Content Include="output\medium.in__ultimate-slicing-47945.bmp" />
+    <Content Include="output\small.in__ultimate-slicing-42.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
